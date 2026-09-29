@@ -955,8 +955,16 @@ class MainWindow(QMainWindow):
             self.capture = None
         self.start_btn.setEnabled(True)
         self.stop_btn.setEnabled(False)
-        self.false_alarm_btn.setEnabled(False)
-        self.confirmed_btn.setEnabled(False)
+        # Deliberately NOT disabling the mark-alert buttons here: this used to
+        # force them off on every stop, which made it impossible to give
+        # feedback on an alert from the session you just stopped -- exactly
+        # the moment you're most likely to want to (you stopped to go look at
+        # the machine, and now you know whether it was real). They stay
+        # enabled as long as this session actually scored something; only
+        # reset them if this session never got as far as producing a scorer.
+        has_scored_session = self.scorer is not None and self.scorer.last_event is not None
+        self.false_alarm_btn.setEnabled(has_scored_session)
+        self.confirmed_btn.setEnabled(has_scored_session)
         self.status_text.setText(f"Stopped. Profile: {self.current_profile.name if self.current_profile else '-'}")
         self.status_light.set_state("idle")
 
@@ -1020,28 +1028,33 @@ class MainWindow(QMainWindow):
             }) + "\n")
 
     def _mark_false_alarm(self) -> None:
+        # Deliberately not using QMessageBox here: on this machine, native
+        # unstyled dialogs (see _prompt_profile_name's comment above) have
+        # rendered invisibly/behind-window before, which made a working
+        # button look broken. The status label is always on screen and
+        # already styled, so it can't fail silently the same way.
         if self.scorer is None or self.current_profile is None:
-            QMessageBox.information(
-                self, "Nothing to mark",
-                "Start monitoring a profile first -- there's no active session to give "
-                "feedback on yet.",
+            self.status_text.setText(
+                "Nothing to mark -- start monitoring a profile first."
             )
             return
         self.scorer.mark_false_alarm()
         baseline.save_profile(self.current_profile)
-        QMessageBox.information(self, "Noted", "Threshold widened slightly for this profile.")
+        self.status_text.setText(
+            f"Noted: false alarm for '{self.current_profile.name}' -- threshold widened slightly."
+        )
 
     def _mark_confirmed(self) -> None:
         if self.scorer is None or self.current_profile is None:
-            QMessageBox.information(
-                self, "Nothing to mark",
-                "Start monitoring a profile first -- there's no active session to give "
-                "feedback on yet.",
+            self.status_text.setText(
+                "Nothing to mark -- start monitoring a profile first."
             )
             return
         self.scorer.mark_confirmed_issue()
         baseline.save_profile(self.current_profile)
-        QMessageBox.information(self, "Noted", "Recorded as a confirmed issue.")
+        self.status_text.setText(
+            f"Noted: confirmed issue recorded for '{self.current_profile.name}'."
+        )
 
     def closeEvent(self, event) -> None:  # noqa: N802
         self._stop_monitoring()
