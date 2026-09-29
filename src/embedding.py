@@ -192,7 +192,16 @@ class YamNetEmbedder:
         problem -- see models/README.md for the clone command."""
         if self._mel_transform is None:
             _ensure_vendored_torch_audioset_on_path()
+            import torch
             from torch_audioset.data.torch_input_processing import WaveformToInput
+            # Belt-and-suspenders alongside main.py's OMP/VECLIB/MKL thread-count
+            # env vars: this embedding runs on a background QThread (baseline
+            # recording), and multi-threaded PyTorch CPU math is not reliably
+            # thread-safe when called off the main thread on macOS (Accelerate
+            # framework), which caused a bus error crash after a full baseline
+            # recording. Forcing single-threaded torch avoids that regardless
+            # of whether the env vars were set before torch's own import.
+            torch.set_num_threads(1)
             self._mel_transform = WaveformToInput()
         return self._mel_transform
 
