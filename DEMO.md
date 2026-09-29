@@ -4,6 +4,17 @@ Rehearse this end to end at least once before presenting — the timing assumes 
 baseline profile for your demo machine is **already recorded and saved** beforehand;
 don't record it live unless you have time to spare.
 
+**If you don't have the actual Snapdragon hardware for this recording** (e.g. filming on
+a dev machine because the target device wasn't available in time): don't fake the NPU
+label or benchmark number. Say plainly what you're showing instead — "this is running on
+CPU fallback right now since I'm recording on a dev machine; the app auto-detects and
+would use the Hexagon NPU on the actual Snapdragon target, and here's the code that does
+that [point at `embedding.py`'s provider selection or the provider label showing
+`CPUExecutionProvider`]." Judges evaluating Technical Implementation care that the
+engineering is real and correct, which the rest of this demo still proves regardless of
+which provider is active — an honest "here's the one thing I couldn't test without the
+physical device" reads better than a claim that falls apart under a follow-up question.
+
 A recorded video (60-90s) of this exact flow, run against a real machine with a real
 induced fault (not a synthetic test tone), is worth recording separately and including in
 the submission even if you also present live — every comparable-hackathon winner we
@@ -22,11 +33,15 @@ produce a genuinely different sound signature the app hasn't seen in its baselin
 ## Before you go on stage
 
 - [ ] `models/yamnet_npu.onnx` is the real AI-Hub-compiled asset (NOT `yamnet_public.onnx`)
-- [ ] `python src/main.py` launches cleanly and the left panel shows
-      `Inference: NPU (QNN) — model: yamnet_npu.onnx` — screenshot this, it's your proof
-- [ ] Click "Benchmark NPU vs CPU" once beforehand so the "Performance proof" panel shows
-      a real number (e.g. "3.1 ms/window • 5.4x faster than CPU") — screenshot this too;
-      re-running it live on stage also works and is a good beat on its own (see below)
+- [ ] `python src/main.py` launches cleanly. On real Snapdragon hardware, the left panel
+      should show `Inference: NPU (QNN) — model: yamnet_npu.onnx` — screenshot this, it's
+      your proof. On a dev machine it'll correctly show `CPUExecutionProvider` instead --
+      that's expected, not a bug, since QNN only exists on Snapdragon hardware.
+- [ ] Click "Benchmark NPU vs CPU" once beforehand. On Snapdragon hardware this shows a
+      real speedup number (e.g. "3.1 ms/window • 5.4x faster than CPU") — screenshot this,
+      re-running it live on stage also works and is a good beat on its own (see below). On
+      a dev machine it'll honestly report only one provider was available -- don't present
+      that as an NPU number.
 - [ ] A saved profile exists for the demo machine, with a sensible threshold (test it
       beforehand so you know roughly what triggers it)
 - [ ] You have a way to make the "anomaly" sound happen on demand — ideally a real,
