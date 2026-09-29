@@ -1,0 +1,24 @@
+.vscode/
+exp/
+tools/output
+
+build/
+dist/
+*.egg-info/
+*.egg
+*.py[cod]
+__pycache__/
+*.so
+*~
+
+# due to using tox and pytest
+.tox
+.cache
+
+# notebook checkpoints
+.ipynb_checkpoints
+.vscode/
+
+# exp folder
+exp/
+.idea/
