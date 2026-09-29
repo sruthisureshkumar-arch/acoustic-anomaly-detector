@@ -1,0 +1,23 @@
+numpy>=1.26,<2.0
+scipy>=1.11
+onnxruntime>=1.18       # on a real Snapdragon PC, replace with onnxruntime-qnn for the QNN Execution Provider
+sounddevice>=0.4.6
+soundfile>=0.12.1
+PyQt6>=6.6
+qai-hub>=0.9            # only needed for the model-compile step, not at app runtime
+
+# Preprocessing only: the real YamNet export takes a log-mel spectrogram, not
+# raw audio, so we reuse torch_audioset's own mel-spectrogram front end
+# (the exact reference implementation Qualcomm's export was traced from)
+# rather than re-deriving that math by hand. See embedding.py's module
+# docstring for why, and for the post-hackathon optimization this implies
+# (porting this one step to plain numpy to drop the torch/torchaudio weight).
+torch>=2.4
+torchaudio>=2.4,<2.10
+
+# NOT torch_audioset -- it doesn't install via pip on every platform (its
+# setup.py uses an old-style distutils option that breaks under newer
+# setuptools). Vendor it instead, once, from the project root:
+#     git clone https://github.com/w-hc/torch_audioset.git vendor/torch_audioset
+# embedding.py adds vendor/torch_audioset to sys.path automatically at
+# runtime and imports it from there -- no further setup needed after cloning.

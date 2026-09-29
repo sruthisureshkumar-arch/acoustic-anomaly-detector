@@ -1,0 +1,38 @@
+{
+    "model_id": "yamnet",
+    "model_name": "YamNet",
+    "runtime": "onnx",
+    "precision": "float",
+    "tool_versions": {
+        "qairt": "2.45.0.260326154327",
+        "onnx_runtime": "1.27.1"
+    },
+    "model_files": {
+        "yamnet.onnx": {
+            "inputs": {
+                "audio": {
+                    "shape": [
+                        1,
+                        1,
+                        96,
+                        64
+                    ],
+                    "dtype": "float32"
+                }
+            },
+            "outputs": {
+                "class_scores": {
+                    "shape": [
+                        1,
+                        521
+                    ],
+                    "dtype": "float32"
+                }
+            }
+        }
+    },
+    "supplementary_files": {
+        "labels.txt": "Mapping of model prediction indices -> string labels."
+    },
+    "use_case": "Audio Classification"
+}
